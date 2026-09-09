@@ -1,0 +1,110 @@
+[
+  {
+    "id": "TC1",
+    "ac": "AC1",
+    "text": "Given 存在一个匹配关键字的 VOIP.ms sub-account, When 用该关键字调用 find_subaccount, Then 返回包含该 sub-account 的匹配列表",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_find_subaccount_returns_match"]
+  },
+  {
+    "id": "TC2",
+    "ac": "AC1",
+    "text": "Given 没有任何 sub-account 匹配该关键字, When 调用 find_subaccount, Then 返回空的匹配列表而不是错误",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_find_subaccount_no_match_returns_empty_list"]
+  },
+  {
+    "id": "TC3",
+    "ac": "AC2",
+    "text": "Given 一个存在的 sub-account, When 调用 get_subaccount, Then 返回值中包含当前语音信箱转接设置",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_get_subaccount_returns_current_config"]
+  },
+  {
+    "id": "TC4",
+    "ac": "AC2",
+    "text": "Given 一个不存在的 sub-account, When 调用 get_subaccount, Then 返回 not_found 错误",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_get_subaccount_unknown_account_returns_not_found"]
+  },
+  {
+    "id": "TC5",
+    "ac": "AC3",
+    "text": "Given 一个存在的 sub-account, When 调用 list_voicemail_boxes, Then 返回至少一个语音信箱条目的列表",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_list_voicemail_boxes_returns_boxes"]
+  },
+  {
+    "id": "TC6",
+    "ac": "AC3",
+    "text": "Given 一个没有配置任何语音信箱的 sub-account, When 调用 list_voicemail_boxes, Then 返回空列表而不是错误",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_list_voicemail_boxes_empty_is_not_error"]
+  },
+  {
+    "id": "TC7",
+    "ac": "AC4",
+    "text": "Given 一个存在的 sub-account 和一个存在于其语音信箱列表中的目标, When 调用 set_voicemail_redirect 更新转接, Then 返回值里转接字段的 after 等于目标值、before 等于更新前的值",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_set_voicemail_redirect_updates_target_field"]
+  },
+  {
+    "id": "TC8",
+    "ac": "AC4",
+    "text": "Given 该 sub-account 更新前已配置的其它字段（如来电显示号码）, When 只更新语音信箱转接目标, Then 更新后这些其它字段的值与更新前完全一致，不被重置为默认值",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_set_voicemail_redirect_does_not_reset_other_fields"]
+  },
+  {
+    "id": "TC9",
+    "ac": "AC5",
+    "text": "Given 一个不在该 sub-account 语音信箱列表中的目标, When 调用 set_voicemail_redirect, Then 返回 invalid_argument 错误，且未向 vendor 发起写请求",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_set_voicemail_redirect_rejects_unknown_target_without_writing"]
+  },
+  {
+    "id": "TC10",
+    "ac": "AC6",
+    "text": "Given vendor 返回鉴权失败（凭据无效或 IP 不在白名单）, When 调用任一工具, Then 返回 unauthorized 错误且不包含凭据本身",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_upstream_auth_failure_maps_to_unauthorized"]
+  },
+  {
+    "id": "TC11",
+    "ac": "AC7",
+    "text": "Given vendor API 返回 5xx 或超时且服务已完成内部有限次重试仍失败, When 调用任一工具, Then 返回 upstream_error 且 retryable 为 true",
+    "type": "auto",
+    "tests": ["tests/test_tools.py::test_upstream_5xx_maps_to_retryable_upstream_error"]
+  },
+  {
+    "id": "TC12",
+    "ac": "AC8",
+    "text": "Given 两个不同租户各自持有一套 VOIP.ms 执行账号凭据, When 各自并发调用工具查询/操作自己名下的 sub-account, Then 一方的凭据看不到、也不会影响另一方名下的数据",
+    "type": "manual",
+    "steps": [
+      "准备两组不同的 X-Voipms-Api-Username/X-Voipms-Api-Password 凭据（对应两个不同的 VOIP.ms 执行账号或沙箱账号）",
+      "用第一组凭据直接 POST /mcp 调用 voipms_get_subaccount(仅在第一组账号名下存在的 account)",
+      "用第二组凭据直接 POST /mcp 调用同一个 account",
+      "对比两次响应"
+    ],
+    "expect": "第一次调用返回该 account 的完整配置；第二次调用返回 not_found 或鉴权失败（而不是把第一组账号下的数据返回给第二组凭据），即两套凭据之间互不可见",
+    "result": "untested",
+    "notes": "依赖两套真实/沙箱 VOIP.ms 执行账号凭据，客户尚未提供（见技术设计风险与依赖）；不能仅用 mock 完全替代，因为要验证的是服务在并发请求下是否会把凭据/状态跨请求错误共享，锚定 OWASP API1:2023 Broken Object Level Authorization"
+  },
+  {
+    "id": "TC13",
+    "ac": "AC9",
+    "text": "Given mcp-service-gateway 的 vendor/registry.yaml 已登记 voipms 条目并部署, When 在产品 Library 查看连接器目录并点击连接, Then 出现 VOIP.ms 卡片，Credential form 字段与 registry.yaml 声明一致，连接成功后详情页工具列表含 4 个 voipms_ 前缀工具",
+    "type": "manual",
+    "steps": [
+      "确认 mcp-service-gateway/vendor/registry.yaml 已追加 voipms 条目并已部署（跨仓库依赖，不在本单范围内完成）",
+      "以管理员身份打开产品 Library 页面",
+      "查找 VOIP.ms 连接器卡片并点击 Connect",
+      "按 README 声明的 Header 凭据表格逐项填入执行账号与 API 密码，提交 Save & connect",
+      "打开该连接器详情页，点击 Refresh Tools"
+    ],
+    "expect": "Library 出现 VOIP.ms 卡片；Credential form 字段与本单 README 声明一致；连接成功后详情页 Tools 列表包含 4 个 voipms_ 前缀工具",
+    "result": "untested",
+    "notes": "依赖 mcp-service-gateway 的登记改动（跨仓库，另计），本单交付时该依赖大概率尚未完成，需等依赖就绪后再执行"
+  }
+]
