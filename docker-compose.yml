@@ -1,0 +1,11 @@
+# Local debugging only (vendor-mcp-development-sop.md SS12). Not used by the
+# platform -- the Gateway runs the built image directly and injects
+# per-tenant credentials as headers, not environment variables.
+services:
+  voipms-mcp:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      MCP_HTTP_PORT: "8080"
+      MCP_HTTP_HOST: "0.0.0.0"

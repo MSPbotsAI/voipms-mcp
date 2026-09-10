@@ -4,77 +4,99 @@
     "ac": "AC1",
     "text": "Given 存在一个匹配关键字的 VOIP.ms sub-account, When 用该关键字调用 find_subaccount, Then 返回包含该 sub-account 的匹配列表",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_find_subaccount_returns_match"]
+    "tests": ["tests/test_tools.py::test_tc1_find_subaccount_match"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc1_find_subaccount_match PASSED (2026-09-10, gate-selftest.json exit_code=0)"
   },
   {
     "id": "TC2",
     "ac": "AC1",
     "text": "Given 没有任何 sub-account 匹配该关键字, When 调用 find_subaccount, Then 返回空的匹配列表而不是错误",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_find_subaccount_no_match_returns_empty_list"]
+    "tests": ["tests/test_tools.py::test_tc2_find_subaccount_no_match_returns_empty_not_error"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc2_find_subaccount_no_match_returns_empty_not_error PASSED (2026-09-10)"
   },
   {
     "id": "TC3",
     "ac": "AC2",
     "text": "Given 一个存在的 sub-account, When 调用 get_subaccount, Then 返回值中包含当前语音信箱转接设置",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_get_subaccount_returns_current_config"]
+    "tests": ["tests/test_tools.py::test_tc3_get_subaccount_includes_current_voicemail"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc3_get_subaccount_includes_current_voicemail PASSED (2026-09-10)"
   },
   {
     "id": "TC4",
     "ac": "AC2",
     "text": "Given 一个不存在的 sub-account, When 调用 get_subaccount, Then 返回 not_found 错误",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_get_subaccount_unknown_account_returns_not_found"]
+    "tests": ["tests/test_tools.py::test_tc4_get_subaccount_not_found"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc4_get_subaccount_not_found PASSED (2026-09-10)"
   },
   {
     "id": "TC5",
     "ac": "AC3",
     "text": "Given 一个存在的 sub-account, When 调用 list_voicemail_boxes, Then 返回至少一个语音信箱条目的列表",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_list_voicemail_boxes_returns_boxes"]
+    "tests": ["tests/test_tools.py::test_tc5_list_voicemail_boxes_returns_entries"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc5_list_voicemail_boxes_returns_entries PASSED (2026-09-10)"
   },
   {
     "id": "TC6",
     "ac": "AC3",
     "text": "Given 一个没有配置任何语音信箱的 sub-account, When 调用 list_voicemail_boxes, Then 返回空列表而不是错误",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_list_voicemail_boxes_empty_is_not_error"]
+    "tests": ["tests/test_tools.py::test_tc6_list_voicemail_boxes_empty_is_not_an_error"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc6_list_voicemail_boxes_empty_is_not_an_error PASSED (2026-09-10)"
   },
   {
     "id": "TC7",
     "ac": "AC4",
     "text": "Given 一个存在的 sub-account 和一个存在于其语音信箱列表中的目标, When 调用 set_voicemail_redirect 更新转接, Then 返回值里转接字段的 after 等于目标值、before 等于更新前的值",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_set_voicemail_redirect_updates_target_field"]
+    "tests": ["tests/test_tools.py::test_tc7_set_voicemail_redirect_reports_before_after"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc7_set_voicemail_redirect_reports_before_after PASSED (2026-09-10)"
   },
   {
     "id": "TC8",
     "ac": "AC4",
     "text": "Given 该 sub-account 更新前已配置的其它字段（如来电显示号码）, When 只更新语音信箱转接目标, Then 更新后这些其它字段的值与更新前完全一致，不被重置为默认值",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_set_voicemail_redirect_does_not_reset_other_fields"]
+    "tests": ["tests/test_tools.py::test_tc8_set_voicemail_redirect_preserves_other_fields"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc8_set_voicemail_redirect_preserves_other_fields PASSED (2026-09-10); test asserts the captured setSubAccount request body still carries description/callerid_number/account unchanged"
   },
   {
     "id": "TC9",
     "ac": "AC5",
     "text": "Given 一个不在该 sub-account 语音信箱列表中的目标, When 调用 set_voicemail_redirect, Then 返回 invalid_argument 错误，且未向 vendor 发起写请求",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_set_voicemail_redirect_rejects_unknown_target_without_writing"]
+    "tests": ["tests/test_tools.py::test_tc9_invalid_target_rejected_without_vendor_write"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc9_invalid_target_rejected_without_vendor_write PASSED (2026-09-10); test asserts a write_attempted flag (set only inside the mocked setSubAccount handler) stays False"
   },
   {
     "id": "TC10",
     "ac": "AC6",
     "text": "Given vendor 返回鉴权失败（凭据无效或 IP 不在白名单）, When 调用任一工具, Then 返回 unauthorized 错误且不包含凭据本身",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_upstream_auth_failure_maps_to_unauthorized"]
+    "tests": ["tests/test_tools.py::test_tc10_vendor_unauthorized_maps_and_hides_credentials"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc10_vendor_unauthorized_maps_and_hides_credentials PASSED (2026-09-10); asserts the literal test-user/test-pass strings are absent from the returned envelope"
   },
   {
     "id": "TC11",
     "ac": "AC7",
     "text": "Given vendor API 返回 5xx 或超时且服务已完成内部有限次重试仍失败, When 调用任一工具, Then 返回 upstream_error 且 retryable 为 true",
     "type": "auto",
-    "tests": ["tests/test_tools.py::test_upstream_5xx_maps_to_retryable_upstream_error"]
+    "tests": ["tests/test_tools.py::test_tc11_upstream_5xx_exhausts_retries_then_upstream_error"],
+    "result": "pass",
+    "evidence": "uv run pytest -v -> tests/test_tools.py::test_tc11_upstream_5xx_exhausts_retries_then_upstream_error PASSED (2026-09-10); asserts exactly 3 vendor call attempts (SS5 limited retries) before upstream_error is returned"
   },
   {
     "id": "TC12",
@@ -89,7 +111,7 @@
     ],
     "expect": "第一次调用返回该 account 的完整配置；第二次调用返回 not_found 或鉴权失败（而不是把第一组账号下的数据返回给第二组凭据），即两套凭据之间互不可见",
     "result": "untested",
-    "notes": "依赖两套真实/沙箱 VOIP.ms 执行账号凭据，客户尚未提供（见技术设计风险与依赖）；不能仅用 mock 完全替代，因为要验证的是服务在并发请求下是否会把凭据/状态跨请求错误共享，锚定 OWASP API1:2023 Broken Object Level Authorization"
+    "notes": "依赖两套真实/沙箱 VOIP.ms 执行账号凭据，客户尚未提供（见技术设计风险与依赖）；不能仅用 mock 完全替代，因为要验证的是服务在并发请求下是否会把凭据/状态跨请求错误共享，锚定 OWASP API1:2023 Broken Object Level Authorization。本轮已用单测替代验证了单一请求内的隔离机制本身（server.py 用 contextvars.ContextVar 且 finally 里 reset，见 tests/test_middleware.py::test_context_var_is_reset_after_request），但并发多租户场景仍需真实凭据才能端到端验证，维持 untested。"
   },
   {
     "id": "TC13",
@@ -105,6 +127,6 @@
     ],
     "expect": "Library 出现 VOIP.ms 卡片；Credential form 字段与本单 README 声明一致；连接成功后详情页 Tools 列表包含 4 个 voipms_ 前缀工具",
     "result": "untested",
-    "notes": "依赖 mcp-service-gateway 的登记改动（跨仓库，另计），本单交付时该依赖大概率尚未完成，需等依赖就绪后再执行"
+    "notes": "依赖 mcp-service-gateway 的登记改动（跨仓库，另计），本单交付时该依赖尚未完成，需等依赖就绪后再执行。本轮已验证：本地起服务后 POST /mcp 的 tools/list（带 Header、无需 initialize 握手）返回全部 4 个 voipms_ 前缀工具及正确的 readOnly/destructive/idempotent 标注，为部署后这一步做了铺垫，但不能替代真实 Library/registry 的端到端验证。"
   }
 ]
